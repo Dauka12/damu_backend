@@ -49,12 +49,20 @@ public class StatisticsRepository {
               dep.name_rus as department_name,
               uc.payment_date,
               uc.date_certificate,
-              (TO_DATE(uc.date_certificate, 'DD.MM.YYYY') - uc.payment_date::date) AS time_spent_days
+              (TO_DATE(uc.date_certificate, 'DD.MM.YYYY') - uc.payment_date::date) AS time_spent_days,
+              qr.quiz_results_id,
+              qr.quiz_id,
+              qr.all_points,
+              qr.points,
+              qr.score
             FROM _user u
             JOIN der_list d ON d.id = u.der_id
             JOIN user_course uc ON uc.user_id = u.user_id
             left JOIN department dep ON dep.id = u.department_id
             JOIN course c ON c.course_id = uc.course_id
+            LEFT JOIN module m ON m.course_id = c.course_id
+            LEFT JOIN quiz q ON q.module_id = m.id
+            INNER JOIN quiz_results qr ON qr.quiz_id = q.quiz_id AND qr.user_id = u.user_id
             WHERE uc.status = 'finished'
         """);
 
@@ -70,7 +78,16 @@ public class StatisticsRepository {
         }
 
         // 4) Выполняем запрос и возвращаем результат
-        return jdbcTemplate.queryForList(sb.toString());
+        List<Map<String, Object>> result = jdbcTemplate.queryForList(sb.toString());
+
+        // 5) Преобразуем результат
+        for (Map<String, Object> r : result) {
+            Integer maxPoints = r.get("all_points") != null ? ((Number) r.get("all_points")).intValue() : null;
+            Integer userPoints = r.get("points") != null ? ((Number) r.get("points")).intValue() : null;
+            Double score = r.get("score") != null ? ((Number) r.get("score")).doubleValue() : null;
+        }
+
+        return result;
     }
 
     /**
@@ -91,24 +108,37 @@ public class StatisticsRepository {
         // 3) Строим SQL
         StringBuilder sb = new StringBuilder();
         sb.append("""
-            SELECT
-              c.course_id,
-              c.course_name,
-              u.user_id,
-              u.firstname,
-              u.lastname,
-              dep.name_rus as department_name,
-              d.name_rus AS der_name_rus,
-              d.name_kaz AS der_name_kaz,
-              uc.payment_date,
-              uc.date_certificate,
-              (TO_DATE(uc.date_certificate, 'DD.MM.YYYY') - uc.payment_date::date) AS time_spent_days
-            FROM user_course uc
-            JOIN course c ON c.course_id = uc.course_id
-            JOIN _user u ON u.user_id = uc.user_id
-            left JOIN department dep ON dep.id = u.department_id
-            JOIN der_list d ON d.id = u.der_id
-            WHERE uc.status = 'finished'
+           SELECT
+  c.course_id,
+  c.course_name,
+  u.user_id,
+  u.firstname,
+  u.lastname,
+  dep.name_rus AS department_name,
+  d.name_rus AS der_name_rus,
+  d.name_kaz AS der_name_kaz,
+  uc.payment_date,
+  uc.date_certificate,
+  (TO_DATE(uc.date_certificate, 'DD.MM.YYYY') - uc.payment_date::date) AS time_spent_days,
+  qr.quiz_results_id,
+  qr.quiz_id,
+  COALESCE(qr.all_points, 0) AS all_points,
+  COALESCE(qr.points, 0) AS points,
+  COALESCE(qr.score, 0) AS score
+FROM user_course uc
+JOIN course c ON c.course_id = uc.course_id
+JOIN _user u ON u.user_id = uc.user_id
+LEFT JOIN department dep ON dep.id = u.department_id
+JOIN der_list d ON d.id = u.der_id
+
+-- для получения результатов тестов
+LEFT JOIN module m ON m.course_id = c.course_id
+INNER JOIN quiz q ON q.module_id = m.id
+LEFT JOIN quiz_results qr ON qr.quiz_id = q.quiz_id AND qr.user_id = u.user_id
+
+WHERE uc.status = 'finished'
+ORDER BY u.user_id, c.course_id, qr.quiz_results_id;
+
         """);
 
         // Если canViewAll = false, фильтруем по u.der_id

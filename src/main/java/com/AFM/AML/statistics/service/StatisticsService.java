@@ -46,17 +46,22 @@ public class StatisticsService {
                 String department_name = (String) r.get("department_name");
                 String courseName = (String) r.get("course_name");
 
-                // time_spent_days
                 Integer timeSpentDays = null;
                 if (r.get("time_spent_days") != null) {
                     timeSpentDays = ((Number) r.get("time_spent_days")).intValue();
                 }
 
+                Integer maxPoints = r.get("all_points") != null ? ((Number) r.get("all_points")).intValue() : null;
+                Integer userPoints = r.get("points") != null ? ((Number) r.get("points")).intValue() : null;
+                Double score = r.get("score") != null ? ((Number) r.get("score")).doubleValue() : null;
+
                 userFullNameMap.putIfAbsent(uId, firstname + " " + lastname);
                 userDepartmentMap.putIfAbsent(uId, department_name);
 
                 userCoursesMap.computeIfAbsent(uId, x -> new ArrayList<>())
-                        .add(new CourseFinishedInfoDto(courseName, timeSpentDays));
+                        .add(new CourseFinishedInfoDto(courseName, timeSpentDays, maxPoints, userPoints, score));
+
+                System.out.println("TypeStat DTO: " + courseName + " maxPoints=" + maxPoints + " userPoints=" + userPoints + " score=" + score);
             }
 
             // 4. Формируем who_finished

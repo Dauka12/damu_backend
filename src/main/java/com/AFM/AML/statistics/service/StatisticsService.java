@@ -110,6 +110,7 @@ public class StatisticsService {
 
         for (Long courseId : groupedByCourse.keySet()) {
             List<Map<String, Object>> rowList = groupedByCourse.get(courseId);
+            String courseName = courseNames.get(courseId);
 
             // finished_count = rowList.size()
             List<WhoFinishedCourseDto> whoFinished = new ArrayList<>();
@@ -117,7 +118,10 @@ public class StatisticsService {
                 String fn = (String) r.get("firstname");
                 String ln = (String) r.get("lastname");
                 String department_name = (String) r.get("department_name");
-                whoFinished.add(new WhoFinishedCourseDto(fn + " " + ln, department_name));
+                Integer maxPoints = r.get("all_points") != null ? ((Number) r.get("all_points")).intValue() : null;
+                Integer userPoints = r.get("points") != null ? ((Number) r.get("points")).intValue() : null;
+                Double score = r.get("score") != null ? ((Number) r.get("score")).doubleValue() : null;
+                whoFinished.add(new WhoFinishedCourseDto(fn + " " + ln, department_name, maxPoints, userPoints, score));
             }
 
             result.add(new CourseStatisticsDto(

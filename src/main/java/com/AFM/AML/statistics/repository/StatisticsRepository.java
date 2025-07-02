@@ -122,9 +122,9 @@ public class StatisticsRepository {
   (TO_DATE(uc.date_certificate, 'DD.MM.YYYY') - uc.payment_date::date) AS time_spent_days,
   qr.quiz_results_id,
   qr.quiz_id,
-  COALESCE(qr.all_points, 0) AS all_points,
-  COALESCE(qr.points, 0) AS points,
-  COALESCE(qr.score, 0) AS score
+qr.all_points AS all_points,
+qr.points AS points,
+qr.score AS score
 FROM user_course uc
 JOIN course c ON c.course_id = uc.course_id
 JOIN _user u ON u.user_id = uc.user_id
@@ -133,8 +133,8 @@ JOIN der_list d ON d.id = u.der_id
 
 -- для получения результатов тестов
 LEFT JOIN module m ON m.course_id = c.course_id
-INNER JOIN quiz q ON q.module_id = m.id
-LEFT JOIN quiz_results qr ON qr.quiz_id = q.quiz_id AND qr.user_id = u.user_id
+LEFT JOIN quiz q ON q.module_id = m.id
+INNER JOIN quiz_results qr ON qr.quiz_id = q.quiz_id AND qr.user_id = u.user_id
 
 WHERE uc.status = 'finished'
 ORDER BY u.user_id, c.course_id, qr.quiz_results_id;

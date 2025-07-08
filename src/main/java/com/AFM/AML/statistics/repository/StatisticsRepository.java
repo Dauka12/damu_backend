@@ -1,7 +1,7 @@
 package com.AFM.AML.statistics.repository;
 
 import com.AFM.AML.User.models.Der;
-import com.AFM.AML.statistics.model.DerAccess;
+import com.AFM.AML.statistics.service.DerAccessService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -11,31 +11,23 @@ import java.util.*;
 public class StatisticsRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final DerAccessRepository derAccessRepository;
+    private final DerAccessService derAccessService;
 
     public StatisticsRepository(JdbcTemplate jdbcTemplate,
-                                DerAccessRepository derAccessRepository) {
+                                DerAccessService derAccessService) {
         this.jdbcTemplate = jdbcTemplate;
-        this.derAccessRepository = derAccessRepository;
+        this.derAccessService = derAccessService;
     }
 
     /**
      * Получаем данные для "type_statistics".
      */
     public List<Map<String, Object>> fetchTypeStatisticsRows(int userId, Integer month, Integer year) {
-        // 1) Находим запись в der_access
-        Optional<DerAccess> opt = derAccessRepository.findByUserId(userId);
-        if (opt.isEmpty()) {
-            // Если запись не найдена, можно вернуть пустой список или кинуть исключение
-            return Collections.emptyList();
-        }
+        // Получаем информацию о доступе пользователя
+        boolean canViewAll = derAccessService.canViewAllDers(userId);
+        Der userDer = derAccessService.getUserDer(userId);
 
-        // 2) Извлекаем нужные поля
-        DerAccess da = opt.get();
-        boolean canViewAll = da.isCanViewAll();
-        Der userDer = da.getDerName(); // Это объект Der (содержит id, name_rus, name_kaz и т.п.)
-
-        // 3) Строим SQL
+        // Строим SQL
         StringBuilder sb = new StringBuilder();
         sb.append("""
             SELECT
@@ -66,7 +58,7 @@ public class StatisticsRepository {
             WHERE uc.status = 'finished'
         """);
 
-        // Если canViewAll = false, нужно фильтровать по тому der_id, который есть у пользователя
+        // Если canViewAll = false, фильтруем по der_id пользователя
         if (!canViewAll && userDer != null) {
             sb.append(" AND u.der_id = ").append(userDer.getId());
         }
@@ -77,35 +69,19 @@ public class StatisticsRepository {
             sb.append(" AND EXTRACT(YEAR FROM uc.payment_date) = ").append(year);
         }
 
-        // 4) Выполняем запрос и возвращаем результат
-        List<Map<String, Object>> result = jdbcTemplate.queryForList(sb.toString());
-
-        // 5) Преобразуем результат
-        for (Map<String, Object> r : result) {
-            Integer maxPoints = r.get("all_points") != null ? ((Number) r.get("all_points")).intValue() : null;
-            Integer userPoints = r.get("points") != null ? ((Number) r.get("points")).intValue() : null;
-            Double score = r.get("score") != null ? ((Number) r.get("score")).doubleValue() : null;
-        }
-
-        return result;
+        // Выполняем запрос и возвращаем результат
+        return jdbcTemplate.queryForList(sb.toString());
     }
 
     /**
      * Получаем данные для "course_statistics".
      */
     public List<Map<String, Object>> fetchCourseStatisticsRows(int userId, Integer month, Integer year) {
-        // 1) Находим запись в der_access
-        Optional<DerAccess> opt = derAccessRepository.findByUserId(userId);
-        if (opt.isEmpty()) {
-            return Collections.emptyList();
-        }
+        // Получаем информацию о доступе пользователя
+        boolean canViewAll = derAccessService.canViewAllDers(userId);
+        Der userDer = derAccessService.getUserDer(userId);
 
-        // 2) Извлекаем нужные поля
-        DerAccess da = opt.get();
-        boolean canViewAll = da.isCanViewAll();
-        Der userDer = da.getDerName(); // указываем, что der - объект
-
-        // 3) Строим SQL
+        // Строим SQL
         StringBuilder sb = new StringBuilder();
         sb.append("""
            SELECT
@@ -130,18 +106,13 @@ JOIN course c ON c.course_id = uc.course_id
 JOIN _user u ON u.user_id = uc.user_id
 LEFT JOIN department dep ON dep.id = u.department_id
 JOIN der_list d ON d.id = u.der_id
-
--- для получения результатов тестов
 LEFT JOIN module m ON m.course_id = c.course_id
 LEFT JOIN quiz q ON q.module_id = m.id
 INNER JOIN quiz_results qr ON qr.quiz_id = q.quiz_id AND qr.user_id = u.user_id
-
 WHERE uc.status = 'finished'
-ORDER BY u.user_id, c.course_id, qr.quiz_results_id;
-
         """);
 
-        // Если canViewAll = false, фильтруем по u.der_id
+        // Если canViewAll = false, фильтруем по der_id пользователя
         if (!canViewAll && userDer != null) {
             sb.append(" AND u.der_id = ").append(userDer.getId());
         }
@@ -152,7 +123,10 @@ ORDER BY u.user_id, c.course_id, qr.quiz_results_id;
             sb.append(" AND EXTRACT(YEAR FROM uc.payment_date) = ").append(year);
         }
 
-        // 4) Выполняем и возвращаем
+        // Добавляем ORDER BY в конце
+        sb.append(" ORDER BY u.user_id, c.course_id, qr.quiz_results_id");
+
+        // Выполняем и возвращаем
         return jdbcTemplate.queryForList(sb.toString());
     }
 

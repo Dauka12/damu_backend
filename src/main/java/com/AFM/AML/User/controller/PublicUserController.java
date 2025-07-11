@@ -25,13 +25,13 @@ public class PublicUserController {
     public ResponseEntity<?> getUserCoursesByIin(@PathVariable String iin) {
         // Проверяем корректность ИИН (12 цифр)
         if (iin == null || !iin.matches("\\d{12}")) {
-            return ResponseEntity.badRequest().body("Некорректный ИИН. ИИН должен содержать 12 цифр.");
+            return ResponseEntity.badRequest().body("incorrect iin format, iin must be 12 digits");
         }
 
         Optional<UserCoursesInfoDTO> userCoursesInfo = userCoursesService.getUserCoursesByIin(iin);
         
         if (!userCoursesInfo.isPresent()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body("User with IIN " + iin + " does not exist in the system.");
         }
         
         return ResponseEntity.ok(userCoursesInfo.get());

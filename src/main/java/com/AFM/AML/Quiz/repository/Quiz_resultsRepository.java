@@ -13,10 +13,10 @@ public interface Quiz_resultsRepository extends JpaRepository<Quiz_results,Integ
     @Query(value = "SELECT EXISTS (SELECT 1 FROM quiz_results WHERE user_id = ?1 AND quiz_id = ?2 and score >= 70)", nativeQuery = true)
     boolean checkIsChecksAccept(int userId, int quizId);
     @Query(value = "SELECT EXISTS (SELECT 1 FROM quiz_results WHERE user_id = ?1 AND quiz_id = ?2 and score <= 70 GROUP BY user_id, quiz_id \n" +
-            "HAVING COUNT(*) > 2)", nativeQuery = true)
+            "HAVING COUNT(*) > 30)", nativeQuery = true)
     boolean checkIsChecksAcceptNot(int userId, int quizId);
     @Query(value = "SELECT EXISTS (SELECT 1 FROM quiz_results WHERE user_id = ?1 AND quiz_id = ?2 and score <= 70 GROUP BY user_id, quiz_id\n" +
-            "    HAVING COUNT(*) > 2)", nativeQuery = true)
+            "    HAVING COUNT(*) > 30)", nativeQuery = true)
     boolean checkIsCheck(int userId, int quizId);
     @Modifying
     @Transactional

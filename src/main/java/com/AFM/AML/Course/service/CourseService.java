@@ -690,25 +690,23 @@ public class CourseService {
                     {"" ,
                             "" ,
                             StringUtils.center(fullName, 90) ,
-                            StringUtils.center("«" + userCourse.getCourse().getCourse_name() + "»", 90),
-                            StringUtils.center("қашықтан оқу форматында сәтті өткенін куәландырады", 90)  ,
+                            StringUtils.center( userCourse.getCourse().getCourse_name(), 20),
+                            StringUtils.center("қашықтан оқу форматында сәтті өткенін куәландырады", 20)  ,
                             StringUtils.center("(9 академиялық сағат)", 90) ,
                             "" ,
-                            StringUtils.center("свидетельствует об успешном прохождении", 90) ,
-                            StringUtils.center("«" + userCourse.getCourse().getCourse_name() + "»", 90)  ,
-                            StringUtils.center("в дистанционном формате (9 академических часов)", 90) ,
+                            StringUtils.center("свидетельствует об успешном прохождении", 50) ,
+                            StringUtils.center(userCourse.getCourse().getCourse_name(), 20)  ,
+                            StringUtils.center("в дистанционном формате (9 академических часов)", 50) ,
                             "" ,
-                            StringUtils.center("Ректор                                                            Мерзадинов Е.C.", 90) ,
-                            "" ,
-                            StringUtils.center("№" + rester + "           Берілген күні/ Дата получения: " + date, 90)};
+                            StringUtils.center("№" + rester + " Берілген күні/ Дата получения: " + date, 50)};
 
 
-            float x = 421;
-            float y = 410;
+            float x = 365;
+            float y = 480;
 
 
             pdfContentByte.beginText();
-            pdfContentByte.setFontAndSize(baseFont, 18);
+            pdfContentByte.setFontAndSize(baseFont, 11);
  // Center of A4 size page
             for(int i=0;i<russianText.length;i++){
                 pdfContentByte.showTextAligned(Element.ALIGN_CENTER, russianText[i], x, y-(i*24), 0);

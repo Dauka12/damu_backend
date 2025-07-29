@@ -673,35 +673,89 @@ public class CourseService {
             int rester = userCourse.getCertificate_int();
             String fullName = userCourse.getStatic_full_name();
 
-            // Обрезаем название курса до определенной длины (например, 50 символов)
+            // Разбиваем название курса на строки если оно слишком длинное
             String courseName = userCourse.getCourse().getCourse_name();
-            if (courseName.length() > 50) {
-                courseName = courseName.substring(0, 50) + "...";
+            List<String> courseNameLines = new ArrayList<>();
+            
+            // Разбиваем текст на строки по 45 символов (уменьшил для лучшего отображения)
+            int maxLineLength = 45;
+            if (courseName.length() <= maxLineLength) {
+                courseNameLines.add(courseName);
+            } else {
+                String[] words = courseName.split(" ");
+                StringBuilder currentLine = new StringBuilder();
+                
+                for (String word : words) {
+                    if (currentLine.length() + word.length() + 1 <= maxLineLength) {
+                        if (currentLine.length() > 0) {
+                            currentLine.append(" ");
+                        }
+                        currentLine.append(word);
+                    } else {
+                        if (currentLine.length() > 0) {
+                            courseNameLines.add(currentLine.toString());
+                            currentLine = new StringBuilder(word);
+                        } else {
+                            // Если одно слово длиннее максимальной длины, обрезаем его
+                            if (word.length() > maxLineLength) {
+                                courseNameLines.add(word.substring(0, maxLineLength - 3) + "...");
+                            } else {
+                                courseNameLines.add(word);
+                            }
+                        }
+                    }
+                }
+                if (currentLine.length() > 0) {
+                    courseNameLines.add(currentLine.toString());
+                }
             }
             
-            String[] russianText =
-                    {"" ,
-                            "" ,
-                            StringUtils.center(fullName, 90) ,
-                            StringUtils.center(courseName, 60),
-                            StringUtils.center("қашықтан оқу форматында сәтті өткенін куәландырады", 20)  ,
-                            "" ,
-                            StringUtils.center("свидетельствует об успешном прохождении", 50) ,
-                            StringUtils.center(courseName, 60)  ,
-                            StringUtils.center("в дистанционном формате", 50) ,
-                            "" ,
-                            StringUtils.center("№" + rester + " Берілген күні/ Дата получения: " + date, 50)};
+            // Создаем массив текста с учетом переносов строк
+            List<String> textLines = new ArrayList<>();
+            textLines.add(""); // пустая строка
+            textLines.add(""); // пустая строка
+            textLines.add(StringUtils.center(fullName, 90));
+            
+            // Добавляем строки названия курса
+            for (String line : courseNameLines) {
+                textLines.add(StringUtils.center(line, 60));
+            }
+            
+            textLines.add(StringUtils.center("қашықтан оқу форматында сәтті өткенін куәландырады", 20));
+            textLines.add(""); // пустая строка
+            textLines.add(StringUtils.center("свидетельствует об успешном прохождении", 50));
+            
+            // Добавляем строки названия курса для русского текста
+            for (String line : courseNameLines) {
+                textLines.add(StringUtils.center(line, 60));
+            }
+            
+            textLines.add(StringUtils.center("в дистанционном формате", 50));
+            textLines.add(""); // пустая строка
+            textLines.add(StringUtils.center("№" + rester + " Берілген күні/ Дата получения: " + date, 50));
 
+            String[] russianText = textLines.toArray(new String[0]);
+
+            // Определяем размер шрифта в зависимости от количества строк
+            int fontSize;
+            if (courseNameLines.size() <= 1) {
+                fontSize = 11; // Обычный размер для коротких названий
+            } else if (courseNameLines.size() <= 2) {
+                fontSize = 10; // Немного меньше для 2 строк
+            } else if (courseNameLines.size() <= 3) {
+                fontSize = 9; // Еще меньше для 3 строк
+            } else {
+                fontSize = 8; // Минимальный размер для длинных названий
+            }
 
             float x = 365;
             float y = 480;
 
-
             pdfContentByte.beginText();
-            pdfContentByte.setFontAndSize(baseFont, 11);
- // Center of A4 size page
+            pdfContentByte.setFontAndSize(baseFont, fontSize);
+            // Center of A4 size page
             for(int i=0;i<russianText.length;i++){
-                pdfContentByte.showTextAligned(Element.ALIGN_CENTER, russianText[i], x, y-(i*24), 0);
+                pdfContentByte.showTextAligned(Element.ALIGN_CENTER, russianText[i], x, y-(i*20), 0);
             }
             pdfContentByte.endText();
             String url = "http://192.168.122.132:9000/api/checkQR/" + user.get().getUser_id() + "/" + course_id;

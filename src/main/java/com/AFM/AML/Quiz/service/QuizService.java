@@ -8,7 +8,6 @@ import com.AFM.AML.User.models.Log;
 import com.AFM.AML.User.models.User;
 import com.AFM.AML.Quiz.models.*;
 import com.AFM.AML.User.repository.UserRepository;
-import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class QuizService {
@@ -122,9 +120,7 @@ public class QuizService {
 
     public Optional<Quiz> getQuiz(int module_id){
         Optional<Quiz> quiz = quizRepository.findQuizByChapterID(module_id);
-        QuestionMcqRequest questionMcqRequest = new QuestionMcqRequest();
         System.out.println(quiz);
-        List<Question> questions = questionRepository.findQuestionByQuizId(quiz.get().getQuiz_id()) ;
         return quiz;
     }
 
@@ -143,12 +139,9 @@ public class QuizService {
             log.setDate(date);
             double points = 0.0;
             double all_points = 0.0;
-            int pointsofquiz = quiz.get().getQuizList().size();
-            if (pointsofquiz >= 20) {
-                all_points = 20.0;
-            } else {
-                all_points = questionRepository.findCountOfQuestions(quiz_id);
-            }
+            
+            all_points = questionRepository.findCountOfQuestions(quiz_id);
+            
             System.out.println(all_points);
             if (mcqQuestionAnswers != null) {
                 for (MCQ_QUESTION_ANSWER mcqQuestionAnswer : mcqQuestionAnswers) {
@@ -198,38 +191,51 @@ public class QuizService {
                         }
                     }
                 }
-                UniqueIntegerGenerator integerGenerator = new UniqueIntegerGenerator();
-                if((checked_lessons * 100)/lessons_by_course >= 100.0){
-                    userCourse.setStatus("finished");
-                    userCourse.setProgress_percentage(100.0);
-                    int integerr = integerGenerator.getNextUniqueInteger();
-                    userCourse.setCertificate_int(integerr);
-                    LocalDate currentLocalDate = LocalDate.now();
-                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy"); // Adjust the format as needed
-                    String formattedDate = currentLocalDate.format(dateFormatter);
-                    userCourse.setDate_certificate(formattedDate);
-                    userCourse.setStatic_full_name(user.get().getLastname() + " " + user.get().getFirstname() + " " + user.get().getPatronymic());
-                }
-                userCourse.setProgress_percentage((checked_lessons * 100.0)/lessons_by_course);
+                
+                // Обновляем прогресс курса
+                double progressPercentage = (checked_lessons * 100.0) / lessons_by_course;
+                userCourse.setProgress_percentage(progressPercentage);
+                
+                // Сохраняем прогресс только если квиз пройден успешно
                 if(score >= 70) {
-//                    UserLessonCheck userLessonCheck = new UserLessonCheck();
-//                    Lesson lesson = new Lesson();
-//                    lesson.setLesson_id(quiz_id);
-//                    userLessonCheck.setUser(user.get());
+                    // Проверяем, завершен ли курс полностью
+                    if(progressPercentage >= 100.0){
+                        userCourse.setStatus("finished");
+                        userCourse.setProgress_percentage(100.0);
+                        
+                        // Выдаем сертификат, если его еще нет
+                        if(userCourse.getCertificate_int() == null || userCourse.getCertificate_int() == 0) {
+                            UniqueIntegerGenerator integerGenerator = new UniqueIntegerGenerator();
+                            int certificateNumber = integerGenerator.getNextUniqueInteger();
+                            userCourse.setCertificate_int(certificateNumber);
+                            
+                            LocalDate currentLocalDate = LocalDate.now();
+                            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                            String formattedDate = currentLocalDate.format(dateFormatter);
+                            userCourse.setDate_certificate(formattedDate);
+                            userCourse.setStatic_full_name(user.get().getLastname() + " " + user.get().getFirstname() + " " + user.get().getPatronymic());
+                        }
+                    }
                     userCourseRepository.save(userCourse);
                 }
             }
         }
-        if(quizResultsRepository.checkIsChecksAccept(user.get().getUser_id(),quiz_id) == true){
+        
+        // Проверяем финальный статус квиза
+        if(quizResultsRepository.checkIsChecksAccept(user.get().getUser_id(), quiz_id)) {
             return "quiz completed";
-        }if(quizResultsRepository.checkIsChecksAcceptNot(user.get().getUser_id(),quiz_id) == false){
+        }
+        
+        // Проверяем, не превышено ли количество попыток (больше 30 неудачных попыток)
+        if(!quizResultsRepository.checkIsChecksAcceptNot(user.get().getUser_id(), quiz_id)) {
             return "quiz failed";
-        }else {
-            System.out.println(quiz.get().getModule().getCourse().getCourse_id());
+        } else {
+            // Пользователь превысил лимит попыток - сбрасываем весь курс
+            System.out.println("Resetting course: " + quiz.get().getModule().getCourse().getCourse_id());
             quizResultsRepository.deleteAllByQuizIdAndUserID(user.get().getUser_id(), quiz.get().getModule().getCourse().getCourse_id());
             userLessonRepo.unchecked(quiz.get().getModule().getCourse().getCourse_id(), user.get().getUser_id());
-            userCourseRepository.resetCourse(user.get().getUser_id(),quiz.get().getModule().getCourse().getCourse_id());
-            return  "zanova";
+            userCourseRepository.resetCourse(user.get().getUser_id(), quiz.get().getModule().getCourse().getCourse_id());
+            return "zanova";
         }
     }
 

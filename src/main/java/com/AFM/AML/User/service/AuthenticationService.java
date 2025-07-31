@@ -187,32 +187,40 @@ public class AuthenticationService {
 
     public ResponseEntity<?> authenticate(AuthenticateRequest request) {
         if(userRepository.existsByEmail(request.getEmail()) == false) {
-            return ResponseEntity.badRequest().body("Email or Password is incorrect");
+            return ResponseEntity.status(401).body("Неправильный логин или пароль");
         }
         if (userRepository.existsByEmailandIsActiveTrue(request.getEmail()) == false) {
-            return ResponseEntity.badRequest().body("Email is not verified yet");
+            return ResponseEntity.status(403).body("Почта не подтверждена");
         }
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
-        Log log = new Log();
-        log.setActivity("authenticated");
-        log.setUser(user);
-        log.setDescription("User with email " + user.getEmail() + " authenticated");
-        Date date = new Date();
-        log.setDate(date);
-        logRepository.save(log);
-        return ResponseEntity.ok(AuthenticationResponse.builder()
-                .token(jwtToken)
-                .user(user)
-                .build());
+        
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            var user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow();
+            var jwtToken = jwtService.generateToken(user);
+            Log log = new Log();
+            log.setActivity("authenticated");
+            log.setUser(user);
+            log.setDescription("User with email " + user.getEmail() + " authenticated");
+            Date date = new Date();
+            log.setDate(date);
+            logRepository.save(log);
+            
+            // Создаем структуру ответа как раньше для совместимости с фронтендом
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("token", jwtToken);
+            responseBody.put("user", user);
+            
+            return ResponseEntity.ok().body(responseBody);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Неправильный логин или пароль");
+        }
     }
     public RedirectView confirmEmail(String confirmationToken) {
         User user = userRepository.findByVerificationCode(confirmationToken);

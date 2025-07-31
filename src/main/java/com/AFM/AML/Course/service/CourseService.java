@@ -525,15 +525,8 @@ public class CourseService {
                 if (module.getQuiz() != null) {
                     List<Question> questions1 = module.getQuiz().getQuizList();
                     List<Question> questions = new ArrayList<>();
-                    if (questions1.size() >= 20) {
-                        // Shuffle the list
-                        Collections.shuffle(questions1);
+                    questions = module.getQuiz().getQuizList();
 
-                        // Select the first 20 questions
-                        questions = questions1.subList(0, 20);
-                    }else {
-                         questions = module.getQuiz().getQuizList();
-                    }
 
                     module.getQuiz().setQuizList(questions);
                     if (quizResultsRepository.checkIsChecksAccept(user.get().getUser_id(), module.getQuiz().getQuiz_id()) == true) {
@@ -714,55 +707,62 @@ public class CourseService {
             List<String> textLines = new ArrayList<>();
             textLines.add(""); // пустая строка
             textLines.add(""); // пустая строка
+            
+            // ФИО
             textLines.add(StringUtils.center(fullName, 90));
+            textLines.add(""); // пустая строка
             
-            // Добавляем строки названия курса
+            // Название курса на казахском
             for (String line : courseNameLines) {
                 textLines.add(StringUtils.center(line, 60));
             }
             
-            textLines.add(StringUtils.center("қашықтан оқу форматында сәтті өткенін куәландырады", 20));
+            // Казахский текст
+            textLines.add(StringUtils.center("курсынан қашықтықтан оқу форматында сәтті өткенін растайды", 60));
             textLines.add(""); // пустая строка
-            textLines.add(StringUtils.center("свидетельствует об успешном прохождении", 50));
             
-            // Добавляем строки названия курса для русского текста
+            // Русский текст
+            textLines.add(StringUtils.center("подтверждает успешное прохождение курса", 60));
+            
+            // Название курса на русском
             for (String line : courseNameLines) {
                 textLines.add(StringUtils.center(line, 60));
             }
             
-            textLines.add(StringUtils.center("в дистанционном формате", 50));
+            textLines.add(StringUtils.center("в дистанционном формате", 60));
             textLines.add(""); // пустая строка
-            textLines.add(StringUtils.center("№" + rester + " Берілген күні/ Дата получения: " + date, 50));
+            textLines.add(""); // пустая строка
+            textLines.add(StringUtils.center("Берілген күні/ Дата получения: " + date, 60));
 
             String[] russianText = textLines.toArray(new String[0]);
 
             // Определяем размер шрифта в зависимости от количества строк
             int fontSize;
             if (courseNameLines.size() <= 1) {
-                fontSize = 11; // Обычный размер для коротких названий
+                fontSize = 16; // Еще больше увеличиваем размер для коротких названий
             } else if (courseNameLines.size() <= 2) {
-                fontSize = 10; // Немного меньше для 2 строк
+                fontSize = 15; // Для 2 строк
             } else if (courseNameLines.size() <= 3) {
-                fontSize = 9; // Еще меньше для 3 строк
+                fontSize = 14; // Для 3 строк
             } else {
-                fontSize = 8; // Минимальный размер для длинных названий
+                fontSize = 13; // Для длинных названий
             }
 
-            float x = 365;
-            float y = 480;
+            float x = 520; // Сдвигаем еще правее (было 400)
+            float y = 360; // Сдвигаем вниз, чтобы текст был ниже слова "Ведомость" (было 480)
 
             pdfContentByte.beginText();
             pdfContentByte.setFontAndSize(baseFont, fontSize);
             // Center of A4 size page
             for(int i=0;i<russianText.length;i++){
-                pdfContentByte.showTextAligned(Element.ALIGN_CENTER, russianText[i], x, y-(i*20), 0);
+                pdfContentByte.showTextAligned(Element.ALIGN_CENTER, russianText[i], x, y-(i*22), 0);
             }
             pdfContentByte.endText();
             String url = "http://192.168.122.132:9000/api/checkQR/" + user.get().getUser_id() + "/" + course_id;
             byte[] qr = qrCodeGenerator.getQrCode(url, 100, 100);
             Image qrImage = Image.getInstance(qr);
-            // Позиционируем QR-код в правом нижнем углу (для A4: ширина ~595, высота ~842)
-            qrImage.setAbsolutePosition(470, 50); // x=470 (справа), y=50 (снизу)
+            // Позиционируем QR-код в правом нижнем углу
+            qrImage.setAbsolutePosition(710, 40); // x=480 (правее), y=60 (снизу)
             pdfContentByte.addImage(qrImage);
 
             pdfStamper.close();

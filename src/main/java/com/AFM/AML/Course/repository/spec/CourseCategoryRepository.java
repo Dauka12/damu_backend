@@ -13,6 +13,10 @@ import java.util.Optional;
 public interface CourseCategoryRepository extends JpaRepository<CourseCategory, Integer> {
     @Query("SELECT c FROM CourseCategory c WHERE c.category_name = :name")
     Optional<CourseCategory> findByCategoryName(@Param("name") String name);
+    
+    @Query("SELECT c FROM CourseCategory c WHERE c.category_name_kaz = :name")
+    Optional<CourseCategory> findByCategoryNameKaz(@Param("name") String name);
+    
     @Query("SELECT c FROM CourseCategory c WHERE c.isDeleted = false")
     List<CourseCategory> findAllNonDeleted();
 }

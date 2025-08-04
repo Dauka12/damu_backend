@@ -8,4 +8,5 @@ import lombok.Setter;
 public class CourseCategoryCreateRequest {
     private int category_id;
     private String category_name;
+    private String category_name_kaz;
 }

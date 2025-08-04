@@ -35,8 +35,13 @@ public class CourseCategoryServiceImpl implements CourseCategoryService {
         if (courseCategoryRepository.findByCategoryName(courseCategoryCreateRequest.getCategory_name()).isPresent()) {
             throw new CourseCategoryAlreadyExistsException("Category with name: " + courseCategoryCreateRequest.getCategory_name() + " already exists.");
         }
+        
+        if (courseCategoryRepository.findByCategoryNameKaz(courseCategoryCreateRequest.getCategory_name_kaz()).isPresent()) {
+        throw new CourseCategoryAlreadyExistsException("Category with Kazakh name: " + courseCategoryCreateRequest.getCategory_name_kaz() + " already exists.");
+        }
         CourseCategory courseCategory = new CourseCategory();
         courseCategory.setCategory_name(courseCategoryCreateRequest.getCategory_name());
+        courseCategory.setCategory_name_kaz(courseCategoryCreateRequest.getCategory_name_kaz());
         courseCategoryRepository.save(courseCategory);
     }
 
@@ -46,8 +51,10 @@ public class CourseCategoryServiceImpl implements CourseCategoryService {
         if (courseCategory.isEmpty()) {
             throw new NotFoundException("Category with id: " + category_id + " not found.");
         }
-        courseCategory.get().setCategory_name(courseCategoryCreateRequest.getCategory_name());
-        courseCategoryRepository.save(courseCategory.get());
+        CourseCategory category = courseCategory.get();
+        category.setCategory_name(courseCategoryCreateRequest.getCategory_name());
+        category.setCategory_name_kaz(courseCategoryCreateRequest.getCategory_name_kaz());
+        courseCategoryRepository.save(category);
     }
 
     @Override

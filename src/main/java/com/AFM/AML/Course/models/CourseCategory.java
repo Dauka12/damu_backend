@@ -26,6 +26,8 @@ public class CourseCategory {
     private String minio_image_name;
     @Column(columnDefinition = "text")
     private String category_name;
+    @Column(columnDefinition = "text")
+    private String category_name_kaz;
     @Column(columnDefinition = "boolean default false")
     private boolean isDeleted;
     @OneToMany(mappedBy = "courseCategory", cascade = CascadeType.ALL, orphanRemoval = true)

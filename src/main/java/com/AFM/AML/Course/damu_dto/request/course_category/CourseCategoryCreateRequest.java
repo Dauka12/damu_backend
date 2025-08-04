@@ -6,5 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CourseCategoryCreateRequest {
+    private int category_id;
     private String category_name;
 }

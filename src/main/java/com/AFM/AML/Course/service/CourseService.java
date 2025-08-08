@@ -765,6 +765,14 @@ public class CourseService {
             qrImage.setAbsolutePosition(710, 40); // x=480 (правее), y=60 (снизу)
             pdfContentByte.addImage(qrImage);
 
+            // Добавляем номер сертификата под QR-кодом
+            String certificateNumber = "№ " + user.get().getUser_id() + "-" + course_id + "-" + rester;
+            pdfContentByte.beginText();
+            pdfContentByte.setFontAndSize(baseFont, 8);
+            pdfContentByte.showTextAligned(Element.ALIGN_CENTER, "Номер сертификата:", 760, 30, 0);
+            pdfContentByte.showTextAligned(Element.ALIGN_CENTER, certificateNumber, 760, 18, 0);
+            pdfContentByte.endText();
+
             pdfStamper.close();
             pdfReader.close();
 

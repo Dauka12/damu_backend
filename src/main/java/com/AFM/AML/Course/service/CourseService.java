@@ -709,6 +709,7 @@ public class CourseService {
             textLines.add(""); // пустая строка
             
             // ФИО
+            textLines.add(StringUtils.center("«DAMU» онлайн оқыту платформасында", 60));
             textLines.add(StringUtils.center(fullName, 90));
             textLines.add(""); // пустая строка
             
@@ -723,6 +724,7 @@ public class CourseService {
             
             // Русский текст
             textLines.add(StringUtils.center("подтверждает успешное прохождение курса", 60));
+            textLines.add(StringUtils.center("на обучающей онлайн платформе «DAMU»", 60));
             
             // Название курса на русском
             for (String line : courseNameLines) {
@@ -730,7 +732,6 @@ public class CourseService {
             }
             
             textLines.add(StringUtils.center("в дистанционном формате", 60));
-            textLines.add(""); // пустая строка
             textLines.add(""); // пустая строка
             textLines.add(StringUtils.center("Берілген күні/ Дата получения: " + date, 60));
 
@@ -748,8 +749,8 @@ public class CourseService {
                 fontSize = 13; // Для длинных названий
             }
 
-            float x = 520; // Сдвигаем еще правее (было 400)
-            float y = 360; // Сдвигаем вниз, чтобы текст был ниже слова "Ведомость" (было 480)
+            float x = 425; // Сдвигаем еще правее (было 400)
+            float y = 410; // Сдвигаем вниз, чтобы текст был ниже слова "Ведомость" (было 480)
 
             pdfContentByte.beginText();
             pdfContentByte.setFontAndSize(baseFont, fontSize);
@@ -763,14 +764,14 @@ public class CourseService {
             Image qrImage = Image.getInstance(qr);
             // Позиционируем QR-код в правом нижнем углу
             qrImage.setAbsolutePosition(710, 40); // x=480 (правее), y=60 (снизу)
-            pdfContentByte.addImage(qrImage);
+            // pdfContentByte.addImage(qrImage);
 
             // Добавляем номер сертификата под QR-кодом
             String certificateNumber = "№ " + user.get().getUser_id() + "-" + course_id + "-" + rester;
             pdfContentByte.beginText();
             pdfContentByte.setFontAndSize(baseFont, 8);
-            pdfContentByte.showTextAligned(Element.ALIGN_CENTER, "Номер сертификата:", 760, 30, 0);
-            pdfContentByte.showTextAligned(Element.ALIGN_CENTER, certificateNumber, 760, 18, 0);
+            pdfContentByte.showTextAligned(Element.ALIGN_CENTER, "Номер сертификата:", 760, 50, 0);
+            pdfContentByte.showTextAligned(Element.ALIGN_CENTER, certificateNumber, 760, 38, 0);
             pdfContentByte.endText();
 
             pdfStamper.close();

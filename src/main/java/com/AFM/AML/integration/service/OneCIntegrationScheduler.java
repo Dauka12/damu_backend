@@ -11,7 +11,7 @@ public class OneCIntegrationScheduler {
     private final OneCIntegrationService oneCIntegrationService;
 
     // Раз в сутки в 3:00 ночи
-    @Scheduled(fixedRate = 600000)    // Но прямо сейчас раз в час
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Almaty")
     public void scheduleDailyExport() {
         System.out.println("Запуск выгрузки данных в 1С...");
         oneCIntegrationService.sendFinishedToOneC();

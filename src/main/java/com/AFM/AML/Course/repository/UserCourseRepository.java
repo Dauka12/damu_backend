@@ -35,6 +35,9 @@ public interface UserCourseRepository extends JpaRepository<UserCourse,Integer> 
     @Query(value = "select * from user_course where status = 'request'", nativeQuery = true)
     List<UserCourse> findByUserAndCourseIdRequest();
 
+    // Simple finder by status (Spring Data will implement this by property name)
+    List<UserCourse> findByStatus(String status);
+
     @Query(value = "select course_id from user_course where status in ('process', 'finished') and user_id = ?1", nativeQuery = true)
     List<Integer> findByProcessAndFinished(int id);
 

@@ -34,5 +34,4 @@ public class QrCodeGenerator {
         byte[] pngData = pngOutputStream.toByteArray();
         return pngData;
     }
-
 }

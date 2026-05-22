@@ -82,7 +82,7 @@ public class ChapterService {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("fdsf");
                 minioService.uploadFile(file, path);
-                componentEntryValues1.getValues().put("img", "http://192.168.122.132:9000/aml/" + path);
+                componentEntryValues1.getValues().put("img", minioService.buildPublicUrl(path));
                 componentEntryValuesRepo.save(componentEntryValues1);
         }
         return ResponseEntity.ok().body("d");

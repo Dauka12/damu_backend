@@ -59,7 +59,7 @@ public class ImageUtil {
         if(file!=null){
             String filename=UUID.randomUUID().toString();
             minioService.uploadFile(file,filename);
-            return "http://192.168.122.132:9000/aml/"+filename;
+            return minioService.buildPublicUrl(filename);
         }
         return data;
     }
@@ -71,7 +71,7 @@ public class ImageUtil {
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
-        return "http://192.168.122.132:9000/aml/"+filename;
+        return minioService.buildPublicUrl(filename);
     }
 
     public String images(String data) throws ServerException, InvalidBucketNameException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {

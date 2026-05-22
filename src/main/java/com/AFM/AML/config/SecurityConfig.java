@@ -65,6 +65,7 @@ public class SecurityConfig {
                 "/api/aml/course-category/{id}",
                 "/api/aml/course-category/{id}",
                 "/api/aml/course/getCourseById/**",
+                "/api/media/**",
                 "/api/aml/auth/**",
                 "/api/aml/chapter/**",
                 "/api/trash/**",

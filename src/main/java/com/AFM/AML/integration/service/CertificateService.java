@@ -12,6 +12,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -34,6 +35,9 @@ public class CertificateService {
 
     @Autowired
     private CertificateLogRepository certificateLogRepository;
+
+    @Value("${app.public-base-url}")
+    private String publicBaseUrl;
 
     /**
      * Генерация PDF и логирование отправки.
@@ -128,7 +132,7 @@ public class CertificateService {
         pdfContentByte.endText();
 
         // === QR-код ===
-        String url = "http://192.168.122.132:9000/api/checkQR/" + user.getUser_id() + "/" + courseId;
+        String url = publicBaseUrl.replaceAll("/+$", "") + "/api/checkQR/" + user.getUser_id() + "/" + courseId;
         byte[] qr = qrCodeGenerator.getQrCode(url, 100, 100);
         Image qrImage = Image.getInstance(qr);
         qrImage.setAbsolutePosition(710, 40);

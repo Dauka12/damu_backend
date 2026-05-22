@@ -44,6 +44,7 @@ import io.minio.errors.*;
 import org.hibernate.sql.exec.ExecutionException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -95,6 +96,9 @@ public class CourseService {
     invoiceidRepo invoiceidRepo;
     @Autowired
     PostLinkRepo postLinkRepo;
+
+    @Value("${app.public-base-url}")
+    private String publicBaseUrl;
 
 
     public List<Integer> getUserBazovii(){
@@ -759,7 +763,7 @@ public class CourseService {
                 pdfContentByte.showTextAligned(Element.ALIGN_CENTER, russianText[i], x, y-(i*22), 0);
             }
             pdfContentByte.endText();
-            String url = "http://192.168.122.132:9000/api/checkQR/" + user.get().getUser_id() + "/" + course_id;
+            String url = publicBaseUrl.replaceAll("/+$", "") + "/api/checkQR/" + user.get().getUser_id() + "/" + course_id;
             byte[] qr = qrCodeGenerator.getQrCode(url, 100, 100);
             Image qrImage = Image.getInstance(qr);
             // Позиционируем QR-код в правом нижнем углу

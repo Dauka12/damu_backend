@@ -61,6 +61,9 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: aml
+      MINIO_PUBLIC_URL: http://damu.afm.gov.kz/api/media
+      APP_PUBLIC_BASE_URL: http://damu.afm.gov.kz
     depends_on:
       - minio
       - postgres

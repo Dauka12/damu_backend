@@ -18,6 +18,7 @@ import com.AFM.AML.Course.models.game.UserGame;
 import com.AFM.AML.Quiz.models.Quiz_results;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -60,6 +61,7 @@ public class User implements UserDetails {
     private String iin;
     private String phone_number;
     @NonNull
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String member_of_the_system;
     private String type_of_member;    @ManyToOne(fetch = FetchType.LAZY)
@@ -73,8 +75,10 @@ public class User implements UserDetails {
     private Department department;
 
     private String job_name;
+    @JsonIgnore
     private boolean is_active;
     @Column(length = 64)
+    @JsonIgnore
     private String verificationCode;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -108,26 +112,31 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public String getUsername() {
         return email;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return is_active;
     }
@@ -141,11 +150,9 @@ public class User implements UserDetails {
                 ", patronymic='" + patronymic + '\'' +
                 ", email='" + email + '\'' +
                 ", phone_number='" + phone_number + '\'' +
-                ", password='" + password + '\'' +
                 ", member_of_the_system='" + member_of_the_system + '\'' +
                 ", type_of_member='" + type_of_member + '\'' +
                 ", is_active=" + is_active +
-                ", verificationCode='" + verificationCode + '\'' +
                 ", role=" + role +
                 '}';
     }

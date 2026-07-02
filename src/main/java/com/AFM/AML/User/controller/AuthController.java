@@ -92,7 +92,7 @@ public class AuthController {
         return service.changePassword(principal,password.get("password"));
     }
     @PatchMapping("/change_user")
-    public ResponseEntity<?> changePassword(Principal principal,@RequestBody User user){
+    public ResponseEntity<?> changePassword(Principal principal,@RequestBody UserUpdateRequest user){
         return service.changeUser(user,principal);
     }
     @PostMapping("/createJob")

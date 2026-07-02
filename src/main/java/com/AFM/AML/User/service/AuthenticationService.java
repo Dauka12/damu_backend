@@ -248,7 +248,7 @@ public class AuthenticationService {
         userRepository.save(user.get());
         return ResponseEntity.ok("Password changed");
     }
-    public ResponseEntity<?> changeUser(User user, Principal principal){
+    public ResponseEntity<?> changeUser(UserUpdateRequest user, Principal principal){
         if(principal == null){
             return ResponseEntity.badRequest().body("You should enter access token");
         }
@@ -293,6 +293,9 @@ public class AuthenticationService {
         if (user.getPhone_number() != null) {
             user1.setPhone_number(user.getPhone_number());
         }
+        if (user.getIin() != null) {
+            user1.setIin(user.getIin());
+        }
         if (user.getMember_of_the_system() != null) {
             user1.setMember_of_the_system(user.getMember_of_the_system());
         }
@@ -302,8 +305,8 @@ public class AuthenticationService {
         if (user.getJob_name() != null) {
             user1.setJob_name(user.getJob_name());
         }
-        userRepository.save(user1);
-        return ResponseEntity.ok("User changed");
+        User savedUser = userRepository.save(user1);
+        return ResponseEntity.ok(savedUser);
     }
     public ResponseEntity<?> createJob(Principal principal,JobExperience jobExperience){
         Optional<User> user = userRepository.findByEmail(principal.getName());

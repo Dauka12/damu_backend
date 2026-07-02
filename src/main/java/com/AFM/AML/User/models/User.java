@@ -31,6 +31,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -73,6 +74,12 @@ public class User implements UserDetails {
     @JoinColumn(name = "department_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Department department;
+
+    @Transient
+    private Integer derId;
+
+    @Transient
+    private Integer departmentId;
 
     private String job_name;
     @JsonIgnore

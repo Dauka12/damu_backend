@@ -253,20 +253,56 @@ public class AuthenticationService {
             return ResponseEntity.badRequest().body("You should enter access token");
         }
         System.out.println(principal.getName());
-        Optional<User> user1 = userRepository.findById(user.getUser_id());
-        if(user.getPassword().length() > 30){
-            user1.get().setPassword(user.getPassword());
-        }else {
-            user1.get().setPassword(passwordEncoder.encode(user.getPassword()));
+        Optional<User> user1Optional = userRepository.findById(user.getUser_id());
+        if (user1Optional.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
         }
-        user1.get().setEmail(user.getEmail());
-        user1.get().setFirstname(user.getFirstname());
-        user1.get().setLastname(user.getLastname());
-        user1.get().setPatronymic(user.getPatronymic());
-        user1.get().setMember_of_the_system(user.getMember_of_the_system());
-        user1.get().setType_of_member(user.getType_of_member());
-        user1.get().setJob_name(user.getJob_name());
-        userRepository.save(user1.get());
+
+        User user1 = user1Optional.get();
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            user1.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
+        if (user.getDerId() != null) {
+            Der der = derRepository.findById(user.getDerId())
+                    .orElseThrow(() -> new RuntimeException("Der not found, id=" + user.getDerId()));
+            user1.setDer(der);
+        }
+
+        if (user.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(user.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department not found, id=" + user.getDepartmentId()));
+            if (user.getDerId() != null && department.getDerId() != null && !department.getDerId().equals(user.getDerId())) {
+                return ResponseEntity.badRequest().body("Department does not belong to selected DER");
+            }
+            user1.setDepartment(department);
+        }
+
+        if (user.getEmail() != null) {
+            user1.setEmail(user.getEmail());
+        }
+        if (user.getFirstname() != null) {
+            user1.setFirstname(user.getFirstname());
+        }
+        if (user.getLastname() != null) {
+            user1.setLastname(user.getLastname());
+        }
+        if (user.getPatronymic() != null) {
+            user1.setPatronymic(user.getPatronymic());
+        }
+        if (user.getPhone_number() != null) {
+            user1.setPhone_number(user.getPhone_number());
+        }
+        if (user.getMember_of_the_system() != null) {
+            user1.setMember_of_the_system(user.getMember_of_the_system());
+        }
+        if (user.getType_of_member() != null) {
+            user1.setType_of_member(user.getType_of_member());
+        }
+        if (user.getJob_name() != null) {
+            user1.setJob_name(user.getJob_name());
+        }
+        userRepository.save(user1);
         return ResponseEntity.ok("User changed");
     }
     public ResponseEntity<?> createJob(Principal principal,JobExperience jobExperience){

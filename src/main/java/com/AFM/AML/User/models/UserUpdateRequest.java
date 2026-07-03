@@ -14,6 +14,7 @@ public class UserUpdateRequest {
     private String password;
     private String member_of_the_system;
     private String type_of_member;
+    private String employment_status;
     private String job_name;
     private Integer derId;
     private Integer departmentId;

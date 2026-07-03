@@ -25,7 +25,7 @@ public interface CourseRepo extends JpaRepository<Course,Integer> {
 //    @Query(value = "select * from course where deleted = false", nativeQuery = true)
 //    List<Course> findByDeleted();
 
-    @Query(value = "select c.*, (select count(*) from user_course where user_course.course_id = c.course_id and status = 'finished') as completed_users from course c where deleted = false and draft = false", nativeQuery = true)
+    @Query(value = "select c.*, (select count(*) from user_course uc join _user u on u.user_id = uc.user_id where uc.course_id = c.course_id and uc.status = 'finished' and coalesce(u.employment_status, 'ACTIVE') <> 'FIRED') as completed_users from course c where deleted = false and draft = false", nativeQuery = true)
     List<Course> findAvailable();
 
     @Query(value = "SELECT c.* FROM course c INNER JOIN module m ON m.module_id = c.course_id INNER JOIN quiz l ON l.quiz_id = m.module_id WHERE l.quiz_id = ?1", nativeQuery = true)

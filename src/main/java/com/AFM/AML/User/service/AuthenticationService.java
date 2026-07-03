@@ -167,6 +167,7 @@ public class AuthenticationService {
                 .iin(request.getIin())
                 .der(derEntity)
                 .department(departmentEntity)
+                .employment_status("ACTIVE")
                 .is_active(true)
                 .verificationCode(confirmationToken)
                 .build();
@@ -301,6 +302,13 @@ public class AuthenticationService {
         }
         if (user.getType_of_member() != null) {
             user1.setType_of_member(user.getType_of_member());
+        }
+        if (user.getEmployment_status() != null) {
+            String employmentStatus = user.getEmployment_status().trim().toUpperCase(Locale.ROOT);
+            if (!employmentStatus.equals("ACTIVE") && !employmentStatus.equals("FIRED")) {
+                return ResponseEntity.badRequest().body("Invalid employment status");
+            }
+            user1.setEmployment_status(employmentStatus);
         }
         if (user.getJob_name() != null) {
             user1.setJob_name(user.getJob_name());

@@ -46,11 +46,12 @@ public interface UserCourseRepository extends JpaRepository<UserCourse,Integer> 
     @Query(value = "select count(*) from user_course where status = 'request' and course_id = ?1", nativeQuery = true)
     Integer getCountOfRequest(int courseId);
 
-    @Query(value = "select count(*) from user_course where status = :target", nativeQuery = true)
+    @Query(value = "select count(*) from user_course uc join _user u on u.user_id = uc.user_id where uc.status = :target and coalesce(u.employment_status, 'ACTIVE') <> 'FIRED'", nativeQuery = true)
     Integer getCountByStatus(@Param("target") String target);
 
     @Query(value = "select count(*) from user_course where status = :target and user_id = :userId", nativeQuery = true)
     Integer getCountByStatusAndUser(@Param("target") String target, @Param("userId") Integer userId);
 
-    long countAllByCourseAndStatus(Course course, String status);
+    @Query(value = "select count(*) from user_course uc join _user u on u.user_id = uc.user_id where uc.course_id = :courseId and uc.status = :status and coalesce(u.employment_status, 'ACTIVE') <> 'FIRED'", nativeQuery = true)
+    long countActiveByCourseAndStatus(@Param("courseId") int courseId, @Param("status") String status);
 }

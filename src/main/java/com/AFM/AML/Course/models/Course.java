@@ -61,7 +61,7 @@ public class Course {
     private boolean draft;
     @Column(nullable = true , columnDefinition = "integer default 0")
     private int views;
-    @Formula("(SELECT COUNT(*) FROM user_course uc WHERE uc.course_id = course_id AND uc.status = 'finished')")
+    @Formula("(SELECT COUNT(*) FROM user_course uc JOIN _user u ON u.user_id = uc.user_id WHERE uc.course_id = course_id AND uc.status = 'finished' AND COALESCE(u.employment_status, 'ACTIVE') <> 'FIRED')")
     private int completed_users;
 
     @Column(nullable = false, columnDefinition = "boolean default false")

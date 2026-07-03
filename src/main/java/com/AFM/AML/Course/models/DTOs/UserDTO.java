@@ -13,4 +13,7 @@ public class UserDTO {
     private int user_id;
     private String firstname;
     private String lastname;
+    private String patronymic;
+    private String email;
+    private String employment_status;
 }

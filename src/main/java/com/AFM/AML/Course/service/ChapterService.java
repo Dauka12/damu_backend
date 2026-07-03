@@ -332,7 +332,7 @@ public class ChapterService {
         Optional<User> user = userRepository.findByEmail(principal.getName());
         userLessonRepo.checked(user.get().getUser_id(),lesson_id);
         Course course = courseRepo.findByLessonId(lesson_id);
-        int completedUserCount = (int) this.userCourseRepository.countAllByCourseAndStatus(course, "finished");
+        int completedUserCount = (int) this.userCourseRepository.countActiveByCourseAndStatus(course.getCourse_id(), "finished");
         course.setCompleted_users(completedUserCount);
         System.out.println(course.getCourse_id());
         UserCourse userCourse = userCourseRepository.findByUserAndCourseId(user.get().getUser_id(),course.getCourse_id());

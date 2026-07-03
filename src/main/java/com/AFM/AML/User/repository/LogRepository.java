@@ -14,7 +14,8 @@ public interface LogRepository extends JpaRepository<Log,Integer> {
 
     @Query(value = "SELECT TO_CHAR(l.date, 'YYYY-MM') as date, COUNT(l.log_id) as count, l.activity as name " +
             "FROM log l " +
-            "WHERE l.activity = :activity " +
+            "JOIN _user u ON u.user_id = l.user_id " +
+            "WHERE l.activity = :activity AND COALESCE(u.employment_status, 'ACTIVE') <> 'FIRED' " +
             "GROUP BY TO_CHAR(l.date, 'YYYY-MM'), l.activity ORDER BY TO_CHAR(l.date, 'YYYY-MM')", nativeQuery = true)
     List<Object[]> countLogsByMonthAndActivity(@Param("activity") String activity);
 

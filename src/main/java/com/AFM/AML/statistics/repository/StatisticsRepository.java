@@ -55,6 +55,7 @@ public class StatisticsRepository {
         LEFT JOIN quiz q          ON q.module_id = m.id
         INNER JOIN quiz_results qr ON qr.quiz_id = q.quiz_id AND qr.user_id = u.user_id
         WHERE uc.status = 'finished'
+          AND COALESCE(u.employment_status, 'ACTIVE') <> 'FIRED'
     """);
 
         List<Object> args = new ArrayList<>();
@@ -106,6 +107,7 @@ public class StatisticsRepository {
         LEFT JOIN department dep ON dep.id = u.department_id
         JOIN der_list d ON d.id = u.der_id
         WHERE uc.status = 'finished'
+          AND COALESCE(u.employment_status, 'ACTIVE') <> 'FIRED'
     """);
 
         List<Object> args = new ArrayList<>();

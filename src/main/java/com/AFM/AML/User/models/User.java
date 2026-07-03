@@ -64,7 +64,12 @@ public class User implements UserDetails {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String member_of_the_system;
-    private String type_of_member;    @ManyToOne(fetch = FetchType.LAZY)
+    private String type_of_member;
+    @Builder.Default
+    @Column
+    private String employment_status = "ACTIVE";
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "der_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Der der;

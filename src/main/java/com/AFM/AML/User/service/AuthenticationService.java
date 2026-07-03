@@ -187,22 +187,25 @@ public class AuthenticationService {
 
 
     public ResponseEntity<?> authenticate(AuthenticateRequest request) {
-        if(userRepository.existsByEmail(request.getEmail()) == false) {
+        String email = Optional.ofNullable(request.getEmail()).orElse("").replaceAll("\\s+", "");
+        String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
+
+        if(userRepository.existsByEmail(email) == false) {
             return ResponseEntity.status(401).body("Неправильный логин или пароль");
         }
-        if (userRepository.existsByEmailandIsActiveTrue(request.getEmail()) == false) {
+        if (userRepository.existsByEmailandIsActiveTrue(email) == false) {
             return ResponseEntity.status(403).body("Почта не подтверждена");
         }
         
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getEmail(),
-                            request.getPassword()
+                            email,
+                            password
                     )
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            var user = userRepository.findByEmail(request.getEmail())
+            var user = userRepository.findByEmail(email)
                     .orElseThrow();
             var jwtToken = jwtService.generateToken(user);
             Log log = new Log();
